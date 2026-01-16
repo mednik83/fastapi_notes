@@ -1,83 +1,67 @@
-from datetime import datetime
 from typing import List
-from fastapi import APIRouter, HTTPException
-
-from src.schemas import NoteCreate, NotePatch, NotePut, NoteResponse
-from src.utils import read_json_data, save_to_json_data
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.sql import func
+from sqlalchemy.orm import Session
+from src.schemas import NoteCreate, NotePatch, NoteResponse
+from src.database import get_db
+from src.models import Note
 
 
 router = APIRouter()
 
 @router.get('/notes', response_model=List[NoteResponse])
-def get_notes():
-    notes = read_json_data()
+def get_notes(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    notes = db.query(Note).offset(skip).limit(limit).all()
     return notes
 
 @router.get('/notes/{note_id}', response_model=NoteResponse)
-def get_note(note_id: int):
-    notes = read_json_data()
-    note = next((n for n in notes if n["id"] == note_id), None)
+def get_note(note_id: int, db: Session = Depends(get_db)):
+    note = db.query(Note).filter(Note.id == note_id).first()
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
     return note
 
 @router.post('/notes', response_model=NoteResponse, status_code=201)
-def create_note(note: NoteCreate):
-    notes = read_json_data()
+def create_note(note: NoteCreate, db: Session = Depends(get_db)):
 
-    new_id = notes[-1]['id'] + 1 if notes else 1
-    now = datetime.now().isoformat()
-    new_note = {
-        'id': new_id,
-        **note.model_dump(),
-        'created_at': now,
-        'updated_at': now
-    }
-    notes.append(new_note)
-    save_to_json_data(notes)
-    return new_note
+    db_note = Note(
+        title=note.title,
+        content=note.content,
+        created_at=func.now(),
+        updated_at=func.now()
+    )
+    
+    db.add(db_note)
+    db.commit()
+    db.refresh(db_note)
+
+    return db_note
 
 @router.delete('/notes/{note_id}')
-def delete_note(note_id: int):
-    notes = read_json_data()
-    init_len = len(notes)
-
-    notes = [n for n in notes if n['id'] != note_id]
-
-    if len(notes) == init_len:
+def delete_note(note_id: int, db: Session = Depends(get_db)):
+    db_note = db.query(Note).filter(Note.id == note_id).first()
+    
+    if not db_note:
         raise HTTPException(status_code=404, detail="Note not found")
 
-    save_to_json_data(notes)
+    db.delete(db_note)
+    db.commit()
 
     return {"message": "Note deleted"}
 
-@router.put('/notes/{note_id}', response_model=NoteResponse)
-def put_note(note_data: NotePut, note_id: int):
-
-    notes = read_json_data()
-
-    for n in notes:
-        if n['id'] == note_id:
-            n['title'] = note_data.title
-            n['content'] = note_data.content
-            n['updated_at'] = datetime.now().isoformat()
-            save_to_json_data(notes)
-            return n
-
-    raise HTTPException(status_code=404, detail="Note not found")
-
 @router.patch('/notes/{note_id}', response_model=NoteResponse)
-def update_note(note_id: int, note_data: NotePatch):
-    notes = read_json_data()
-    
-    for n in notes:
-        if n["id"] == note_id:
-            update_data = note_data.model_dump(exclude_unset=True)
-            if not update_data:
-                 return n
-            n.update(update_data)
-            n['updated_at'] = datetime.now().isoformat()
-            save_to_json_data(notes)
-            return n
+def update_note(note_id: int, note_data: NotePatch, db: Session = Depends(get_db)):
+    db_note = db.query(Note).filter(Note.id == note_id).first()
+    if not db_note:
+        raise HTTPException(status_code=404, detail="Note not found")   
+
+    update_data = note_data.model_dump(exclude_unset=True) 
+    if update_data:
+        update_data['updated_at'] = func.now()
+        for field, value in update_data.items():
+            setattr(db_note, field, value)
             
-    raise HTTPException(status_code=404, detail="Note not found")
+    db.commit()
+    db.refresh(db_note)
+
+    return db_note

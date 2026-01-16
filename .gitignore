@@ -3,5 +3,4 @@ __pycache__/
 .vscode/
 .idea/
 
-src/data.json
-d
+notes.db

@@ -1,14 +1,15 @@
-import json
-import os
 from fastapi import FastAPI
 
-from src.config import DATA_PATH
 from src.router import router as notes_router
+from src.models import Base
+from src.database import engine
 
-if not os.path.exists(DATA_PATH):
-    with open(DATA_PATH, 'w') as f:
-        json.dump([], f)
+Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(title="FastAPI Notes API")
 
-app.include_router(notes_router)
+app.include_router(notes_router, prefix="/api", tags=["notes"])
+
+@app.get("/")
+def root():
+    return {"message": "Notes API is running!", "docs": "/docs"}

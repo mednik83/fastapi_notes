@@ -5,18 +5,16 @@ from pydantic import BaseModel
 
 
 class NoteBase(BaseModel):
-    title: Optional[str] = None
-    content: Optional[str] = None
+    title: str
+    content: str
 
 class NoteCreate(NoteBase):
     title: str  
     content: str
 
-class NotePut(NoteCreate):
-    pass
-
 class NotePatch(NoteBase):
-    pass
+    title: Optional[str] = None
+    content: Optional[str] = None
 
 class NoteResponse(NoteBase):
     id: int
@@ -24,3 +22,6 @@ class NoteResponse(NoteBase):
     content: str
     created_at: datetime
     updated_at: datetime
+
+    class Config:
+        from_attributes = True

@@ -8,6 +8,8 @@
 - Python 3.10+
 - FastAPI
 - Pydantic
+- SQLite
+- SQLAlchemy
 - Uvicorn
 
 ## Установка и запуск (Linux)
@@ -51,6 +53,5 @@ http://127.0.0.1:8000/docs
 - `GET /notes`
 - `GET /notes/{id}`
 - `POST /notes`
-- `PUT /notes/{id}`
 - `PATCH /notes/{id}`
 - `DELETE /notes/{id}`

@@ -1,0 +1,23 @@
+### Создать заметку
+POST http://localhost:8000/api/notes/
+Content-Type: application/json
+
+{
+  "title": "Тест",
+  "content": "Тест"
+}
+
+### Получить все
+GET http://localhost:8000/api/notes/
+
+### Обновить первую
+PATCH http://localhost:8000/api/notes/1
+Content-Type: application/json
+
+{
+  "title": "Обновлено Тест",
+  "content": "Обновлено Тест"
+}
+
+### Удалить
+DELETE http://localhost:8000/api/notes/1
