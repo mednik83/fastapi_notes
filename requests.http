@@ -3,12 +3,18 @@ POST http://localhost:8000/api/notes/
 Content-Type: application/json
 
 {
-  "title": "Тест",
-  "content": "Тест"
+  "title": "title",
+  "content": "Text",
+  "tags": ["tag"]
 }
 
 ### Получить все
 GET http://localhost:8000/api/notes/
+Content-Type: application/json
+
+
+### Получить первую
+GET http://localhost:8000/api/notes/1
 
 ### Обновить первую
 PATCH http://localhost:8000/api/notes/1

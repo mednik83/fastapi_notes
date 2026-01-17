@@ -1,7 +1,6 @@
 # FastAPI Notes API
 
 Простое учебное REST API для заметок, написанное на FastAPI.  
-Данные хранятся в JSON-файле.
 
 ## Стек
 
@@ -50,8 +49,11 @@ http://127.0.0.1:8000/docs
 
 ## Эндпоинты
 
-- `GET /notes`
-- `GET /notes/{id}`
-- `POST /notes`
-- `PATCH /notes/{id}`
-- `DELETE /notes/{id}`
+| Method | Endpoint        | Description      |
+|--------|-----------------|------------------|
+| `POST` | `/api/notes/`   | Создать заметку |
+| `GET`  | `/api/notes/`   | Все заметки     |
+| `GET`  | `/api/notes/1`  | Одна заметка    |
+| `PATCH`| `/api/notes/1`  | Обновить        |
+| `DELETE`| `/api/notes/1`| Удалить        |
+
