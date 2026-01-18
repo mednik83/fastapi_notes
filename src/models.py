@@ -17,6 +17,7 @@ class Note(Base):
     title = Column(String, index=True)
     content = Column(Text)
     slug = Column(String, unique=True, index=True)
+    user_id = Column(Integer, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now())
     
